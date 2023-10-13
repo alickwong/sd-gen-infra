@@ -1,0 +1,30 @@
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default-provisioner
+spec:
+  providerRef:
+    name: default-node-template
+
+  labels:
+    billing-team: map-team
+    node-type: "bottlerocket-default"
+
+  annotations:
+    example.com/owner: "my-team"
+
+  requirements:
+    - key: "karpenter.k8s.aws/instance-category"
+      operator: In
+      values: ['m', 'c', 'r']
+    - key: "karpenter.sh/capacity-type" # If not included, the webhook for the AWS cloud provider will default to on-demand
+      operator: In
+      values: [ "spot", "on-demand" ]
+
+  limits:
+    resources:
+      cpu: 1000
+
+  ttlSecondsAfterEmpty: 30
+
+  weight: 40

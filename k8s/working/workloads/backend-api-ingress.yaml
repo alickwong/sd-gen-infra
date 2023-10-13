@@ -1,0 +1,38 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+    name: "sd-gen-backend-api-ingress"
+    namespace: default
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: backend-api-group
+      alb.ingress.kubernetes.io/group.order: '2'
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+spec:
+    rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: "sd-gen-backend-api"
+                port:
+                  number: 3000
+          - path: /public
+            pathType: Prefix
+            backend:
+              service:
+                name: "sd-gen-backend-api"
+                port:
+                  number: 3000
+          - path: /cron
+            pathType: Prefix
+            backend:
+              service:
+                name: "sd-gen-backend-api"
+                port:
+                  number: 3000

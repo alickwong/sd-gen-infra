@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage-pod
+  template:
+    metadata:
+      labels:
+        app: storage-pod
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: karpenter.sh/provisioner-name
+                    operator: DoesNotExist
+      containers:
+        - name: assets
+          image: nginx
+          volumeMounts:
+            - name: efsvolume
+              mountPath: /data
+      volumes:
+        - name: efsvolume
+          persistentVolumeClaim:
+            claimName: webui-claim

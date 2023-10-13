@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sd-gen-jupyter
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sd-gen-jupyter
+  template:
+    metadata:
+      labels:
+        app: sd-gen-jupyter
+    spec:
+#      securityContext:
+#        runAsGroup: 0
+#      serviceAccountName: backend-api-service-account
+      nodeSelector:
+        node-type: "bottle-rocket-gpu-webui"
+      containers:
+        - name: sd-gen-jupyter
+          image: jupyter/scipy-notebook:2023-06-01
+          imagePullPolicy: Always
+          command:
+            - 'start-notebook.sh'
+          args: [ "--NotebookApp.password='argon2:$argon2id$v=19$m=10240,t=10,p=8$JdAN3fe9J45NvK/EPuGCvA$O/tbxglbwRpOFuBNTYrymAEH6370Q2z+eS1eF4GM6Do'" ]
+          ports:
+            - containerPort: 8888
+          env:
+            - name: JUPYTER_PORT
+              value: "8888"
+          volumeMounts:
+            - name: efsvolume
+              mountPath: /home/jovyan/work/data
+#          args:
+#            - '--user'
+#            - 'root'
+      volumes:
+        - name: efsvolume
+          persistentVolumeClaim:
+            claimName: madhead-data-pvc

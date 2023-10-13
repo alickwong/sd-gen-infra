@@ -1,0 +1,24 @@
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: bottlerocket-2
+spec:
+  subnetSelector:
+    aws:cloudformation:stack-name: sd-gen-dev
+  securityGroupSelector:
+    aws:eks:cluster-name: sd-gen-dev
+  amiFamily: Bottlerocket
+  tags:
+    managed-by: "karpenter"
+    intent: "api-server"
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 10Gi
+        volumeType: gp3
+    - deviceName: /dev/xvdb
+      ebs:
+        volumeSize: 80Gi
+        volumeType: gp3
+        snapshotID: snap-0dc0f64e568edbab4

@@ -1,0 +1,8 @@
+{
+  "eksCdk" : {
+    "stackName": "sd-gen-prod"
+  },
+  "frontendCdk": {
+    "backendApiEndpoint": ""
+  }
+}

@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sd-gen-backend-api
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sd-gen-backend-api
+  template:
+    metadata:
+      labels:
+        app: sd-gen-backend-api
+    spec:
+      serviceAccountName: backend-api-service-account
+      nodeSelector:
+        node-type: "bottle-rocket-gpu-webui"
+      containers:
+        - name: sd-gen-backend-api
+          image: xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/sd-gen-backend-api:19a6b209 # 8e998b20e65f7d5deb0757cec0d26ef7f23ce80e
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api
+              port: 3000
+          env:
+            - name: DEBUG
+              value: "1"
+            - name: NODE_ENV
+              value: "production"
+          volumeMounts:
+            - name: efsvolume
+              mountPath: /data
+      volumes:
+        - name: efsvolume
+          persistentVolumeClaim:
+            claimName: madhead-data-pvc

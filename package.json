@@ -1,0 +1,35 @@
+{
+  "name": "ml-model-eks",
+  "version": "0.1.0",
+  "bin": {
+    "ml-model-eks": "bin/ml-model-eks.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk_eks_synth": "cdk synth stable-ml-stack",
+    "cdk_eks_deploy_dev": "cdk deploy sd-gen-dev",
+    "cdk_eks_deploy_prod": "NODE_ENV=prod cdk deploy sd-gen-prod",
+    "cdk_synth_frontend": "cdk synth sd-gen-frontend-stack",
+    "cdk_deploy_frontend": "cdk deploy sd-gen-frontend-stack"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.0",
+    "@types/jest": "^29.4.0",
+    "@types/node": "18.14.6",
+    "aws-cdk": "^2.88.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "~4.9.5"
+  },
+  "dependencies": {
+    "@aws-quickstart/eks-blueprints": "^1.10.1",
+    "@kubecost/kubecost-eks-blueprints-addon": "^0.1.8",
+    "aws-cdk-lib": "^2.88.0",
+    "config": "^3.3.9",
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}

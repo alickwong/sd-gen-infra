@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backend-api-cron
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+           node-type: "bottle-rocket-gpu-webui"
+#          affinity:
+#            nodeAffinity:
+#              requiredDuringSchedulingIgnoredDuringExecution:
+#                nodeSelectorTerms:
+#                  - matchExpressions:
+#                      - key: karpenter.sh/provisioner-name
+#                        operator: DoesNotExist
+          containers:
+            - name: hello
+              image: curlimages/curl:7.72.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the Kubernetes cluster;
+                  curl http://sd-gen-backend-api:3000/cron/checkIdleInstance;
+                  date; 
+                  echo completed curl
+          restartPolicy: OnFailure

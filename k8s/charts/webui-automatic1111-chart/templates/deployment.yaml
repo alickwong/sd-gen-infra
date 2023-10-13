@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: default
+  name: {{ .Values.metadata.name }}-deploy
+  labels:
+    {{- include "webui-chart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "webui-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "webui-chart.selectorLabels" . | nindent 8 }}
+    spec:
+{{/*      affinity:*/}}
+{{/*        nodeAffinity:*/}}
+{{/*          requiredDuringSchedulingIgnoredDuringExecution:*/}}
+{{/*            nodeSelectorTerms:*/}}
+{{/*              - matchExpressions:*/}}
+{{/*                  - key: "billing-team"*/}}
+{{/*                    operator: "In"*/}}
+{{/*                    values: [ "map-team" ]*/}}
+      containers:
+        - name: sd-gen-webui-automatic1111
+          image: "{{ .Values.image.url }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{/*          livenessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /*/}}
+{{/*              port: http*/}}
+{{/*          readinessProbe:*/}}
+{{/*            httpGet:*/}}
+{{/*              path: /*/}}
+{{/*              port: http*/}}
+          env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "compute,utility"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            - name: COMMANDLINE_ARGS
+              value: "--xformers --gradio-auth {{.Values.deployment.webuiLoginName}}:{{.Values.deployment.webuiLoginPassword}} --listen --port 7860 --cors-allow-origins=localhost"
+            - name: INSTANCE_ID
+              value: "{{ .Values.deployment.instanceId}}"
+            - name: USER_ID
+              value: "{{ .Values.deployment.userId}}"
+            - name: HEARTBEAT_URL
+              value: "{{ .Values.deployment.heartbeatUrl}}"
+{{/*            dreambooth settings */}}
+            - name: XFORMERS_PACKAGE
+              value: "xformers==0.0.17.dev447"
+            - name: REQS_FILE
+              value: "./extensions/sd_dreambooth_extension/requirements.txt"
+          volumeMounts:
+            - name: efsvolume
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+{{/*          lifecycle:*/}}
+{{/*            postStart:*/}}
+{{/*              exec:*/}}
+{{/*                command: [ "/bin/sh", "-c", "echo 'pod started'; pwd; ls; /docker/podStart.sh;" ]*/}}
+      volumes:
+        - name: efsvolume
+          persistentVolumeClaim:
+            claimName: {{ .Values.deployment.pvcName }}
+      nodeSelector:
+        node-type: "bottle-rocket-gpu-webui"
+        karpenter.k8s.aws/instance-size: {{ .Values.nodeSelector.instanceType }}
+        karpenter.sh/capacity-type: {{ .Values.nodeSelector.capacityType }}

@@ -1,0 +1,14 @@
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: default-node-template
+spec:
+  subnetSelector:
+    aws:cloudformation:stack-name: sd-gen-dev
+  securityGroupSelector:
+    aws:eks:cluster-name: sd-gen-dev
+  amiFamily: Bottlerocket
+  tags:
+    managed-by: "karpenter"
+    intent: "api-server"
